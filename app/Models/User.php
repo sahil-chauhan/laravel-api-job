@@ -41,4 +41,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function auth_user_get_token()
+    {
+        $user = auth()->user();        
+        if( $user->tokens->count() )
+        {
+            $token = $user->tokens[0]->token;
+        }else{
+            $tokenObj = $user->createToken('Auth SPA Token');
+            $token = $tokenObj->plainTextToken;
+        }
+        return $token;
+    }
+
+
 }
