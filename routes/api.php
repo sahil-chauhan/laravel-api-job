@@ -21,8 +21,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['prefix' => 'auth'],function () {      
-    Route::post('/login',[AuthController::class,'login']);       
+    Route::post('/login',[AuthController::class,'login'])->name('api.login');              
     Route::post('/register/{token}',[AuthController::class,'registerViaEmail'])->name('api.mail.register');       
+    Route::post('/activate/account',[AuthController::class,'activateAccount'])->name('api.mail.activateAccount');   
 });
 
 Route::post('invitations', [InvitationController::class,'store'])->middleware('auth:sanctum');

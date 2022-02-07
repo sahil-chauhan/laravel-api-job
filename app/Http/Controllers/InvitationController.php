@@ -42,7 +42,7 @@ class InvitationController extends Controller
         $invitation->generateInvitationToken();
         $invitation->save();
 
-         Mail::to($request->email)->send(new UserInvitation($invitation));
+        Mail::to($request->email)->send(new UserInvitation($invitation));
 
         return response()->json([
             'message' => 'Invitation sent. Please wait for registration link.'

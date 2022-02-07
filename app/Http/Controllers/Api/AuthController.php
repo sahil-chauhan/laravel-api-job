@@ -11,6 +11,9 @@ use App\Mail\UserInvitation;
 use App\Models\User;
 use App\Models\Invitation;
 
+use App\Mail\UserPinActivation;
+use Mail;
+
 class AuthController extends Controller
 {
     public function login(Request $request)
@@ -73,15 +76,46 @@ class AuthController extends Controller
 
         $user = User::create($request->all());
 
+        $pin = rand(strlen($user->email),10000);
+
+        $pin = ($pin.$user->id); 
+
+        $user->email_verified_pin = $pin;
+        $user->save();
+
+        Mail::to($user->email)->send(new UserPinActivation($pin));
+        
+        return response()->json([
+            'message' => 'Registration successful. Please activate your account using pin received in email.'
+        ], 200);
+    }
+
+    public function activateAccount(Request $request)
+    {   
+        $pin = $request->pin ?? '';
+
+        $user = User::where(['email_verified_pin' => $pin ])->first();
+
+        if( !$user )
+        {
+            return response()->json([
+                'errors' => [
+                    'failed' => ['Pin is invalid']
+                ]
+            ],422);
+        }
+
+        $user->email_verified_at = date('Y-m-d H:i:s');
+        $user->save();
+
         Auth::login($user);
-        $token = $user->auth_user_get_token();
+        $token = auth()->user()->auth_user_get_token();
 
         return response()->json([
             'user' => $user,
             'token'=>$token,
-            'message' => 'Registration successful'
+            'message' => 'Account is activated successfuly'
         ], 200);
-        
 
     }
 }
